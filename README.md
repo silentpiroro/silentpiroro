@@ -1,7 +1,7 @@
 - 👋 Hi, I’m @silentpiroro
-- 👀 I’m interested in automation and machine learning
+- 👀 I’m interested in frontend design of web apps.
 - 🌱 I’m currently learning javascript and node JS
-- 💞️ I’m looking to collaborate on desktop hosiery design applications
+- 💞️ I’m looking to collaborate on ecommerce web apps.
 - 📫 How to reach me: silentpiroro@outlook.com
 
 <!---
