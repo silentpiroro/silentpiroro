@@ -90,7 +90,7 @@
             text-align: center;
             margin-top: 20px;
         }
-      @media (max-width: 600px) {
+       @media (max-width: 600px) {
             body {
                 font-size: 14px; /* You can adjust the font size as needed */
             }
@@ -100,7 +100,7 @@
                 padding: 10px;
             }
 
-            .form-container {
+            .form-container, .summary-container {
                 max-width: 100%;
                 padding: 10px;
             }
@@ -139,7 +139,7 @@
             <label for="orderNumber">Order Number:</label>
             <input type="text" id="orderNumber" placeholder="Enter Order Number" required>
 
-            <button onclick="submitForm()">Submit</button>
+            <button onclick="submitForm()">Submit For A Solution </button>
         </div>
 
         <div class="summary-container" id="summary"></div>
