@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Service Response SOP</title>
+  
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1, h2 {
+            color: #007bff;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label, button {
+            display: block;
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Add padding to customer name, order number, and submit button */
+        #customerName,
+        #orderNumber,
+        button {
+            padding: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .summary-container {
+            text-align: left;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .summary-container h2 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+
+        .summary-container p {
+            margin: 5px 0;
+        }
+
+        /* Center the export button */
+        .export-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+   
+    </style>
+   
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Service Response SOP</h1>
+        <h6> Copyright: Walt Technology Group Co. Ltd (c) 2023 </h6>
+        <div class="form-container">
+            <label for="issueCategory">Issue Category:</label>
+            <select id="issueCategory" onchange="populateSpecificIssues()">
+                <option value="" disabled selected>Select Issue Category</option>
+                <option value="Information Request">Information Request</option>
+                <option value="Product Issue">Product Issue</option>
+                <option value="Logistics Issue">Logistics Issue</option>
+                <option value="Order Handling (In-house Issue)">Order Handling (In-house Issue)</option>
+            </select>
+
+            <label for="specificIssue">Specific Issue:</label>
+            <select id="specificIssue" disabled>
+                <option value="" disabled selected>Select Specific Issue</option>
+            </select>
+
+            <label for="customerName">Customer Name:</label>
+            <input type="text" id="customerName" placeholder="Enter Customer Name" required>
+
+            <label for="orderNumber">Order Number:</label>
+            <input type="text" id="orderNumber" placeholder="Enter Order Number" required>
+
+            <button onclick="submitForm()">Submit</button>
+        </div>
+
+        <div class="summary-container" id="summary"></div>
+
+        <div class="export-button">
+            <button onclick="exportToExcel()">
+              Export to Excel
+          </button>
+        </div>
+    </div>
+
+      <script>
+        const issues = {
+            "Information Request": {
+                "General Product Inquiry": "Answer + General Link + Offer Free Shipping for items over $30 (回答 + 一般链接 + 超过30美元的商品免费送货)",
+                "Specific Product Inquiry AV": "Explanation + Specific Link + Discount/Free Shipping for items over $30 (说明 + 特定链接 + 超过30美元的商品折扣/免费送货)",
+                "Specific Product Inquiry NA": "Apology + Option B Alternative + Date of Availability + Free shipping forwarders over $30 (道歉 + B选项替代品 + 可用日期 + 超过30美元的免费送货转运商)",
+                "Product Origin Inquiry": "Made in the USA + Link to Brand Story + Link to Product Store (美国制造 + 品牌故事链接 + 产品商店链接)"
+            },
+            "Product Issue": {
+                "Product Disappointment": "Investigate + Apologize + Offer Alternative Product (调查 + 道歉 + 提供替代产品)",
+                "Request for Return": "Ask Why? + Send Return Form + Log the Issue (询问原因？ + 发送退货表格 + 记录问题)",
+                "Sizing Issue": "Apologize + Understand Intended Size + Offer Size Chart + Offer Alternative (道歉 + 了解预期尺寸 + 提供尺码图表 + 提供替代产品)"
+            },
+            "Logistics Issue": {
+                "Uncertainty of Product Arrival Time": "Check with Logistics company + Apologize + Send Tracking Info (与物流公司核实 + 道歉 + 发送跟踪信息)",
+                "Inaccurate Tracking Showing Order Arrival": "Check with Delivery Service + Apologize + Progress Update (与送货服务核实 + 道歉 + 进度更新)",
+                "Wrong Delivery Location": "Check with Delivery Service + Apologize + Ongoing Progress Updates until resolved (与送货服务核实 + 道歉 + 持续进度更新直至解决)"
+            },
+            "Order Handling (In-house Issue)": {
+                "Wrong Order/Color Delivered": "Investigate + Apologize + Return Form + Discount on Next Purchase (调查 + 道歉 + 退货表格 + 下次购买折扣)",
+                "Wrong Size Delivered": "Apologize + Size Chart + Return Form + Discount on Next Purchase (道歉 + 尺码图表 + 退货表格 + 下次购买折扣)"
+            }
+        };
+
+        const existingEntries = {};
+
+        function populateSpecificIssues() {
+            const issueCategory = document.getElementById("issueCategory").value;
+            const specificIssueSelect = document.getElementById("specificIssue");
+            specificIssueSelect.innerHTML = "";
+            specificIssueSelect.disabled = false;
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = "Select Specific Issue";
+            specificIssueSelect.appendChild(defaultOption);
+
+            if (issueCategory !== "") {
+                const specificIssues = Object.keys(issues[issueCategory]);
+                specificIssues.forEach((issue) => {
+                    const option = document.createElement("option");
+                    option.value = issue;
+                    option.textContent = issue;
+                    specificIssueSelect.appendChild(option);
+                });
+            }
+        }
+
+        function submitForm() {
+            const issueCategory = document.getElementById("issueCategory").value;
+            const specificIssue = document.getElementById("specificIssue").value;
+            const customerName = document.getElementById("customerName").value;
+            const orderNumber = document.getElementById("orderNumber").value;
+            const summaryDiv = document.getElementById("summary");
+            const summaryContent = document.createElement("div");
+            summaryContent.innerHTML = `<h2>Summary:</h2>
+                <p><strong>Issue Category:</strong> ${issueCategory}</p>
+                <p><strong>Specific Issue:</strong> ${specificIssue}</p>
+                <p><strong>Customer Name:</strong> ${customerName}</p>
+                <p><strong>Order Number:</strong> ${orderNumber}</p>
+                <p><strong>Solution:</strong> ${issues[issueCategory][specificIssue]}</p>`;
+            summaryDiv.innerHTML = "";
+            summaryDiv.appendChild(summaryContent);
+            summaryDiv.style.display = "block";
+
+            // Append the entry to existing entries
+            if (!existingEntries[issueCategory]) {
+                existingEntries[issueCategory] = {};
+            }
+            if (!existingEntries[issueCategory][specificIssue]) {
+                existingEntries[issueCategory][specificIssue] = [];
+            }
+            existingEntries[issueCategory][specificIssue].push({
+                "Customer Name": customerName,
+                "Order Number": orderNumber,
+                "Solution": issues[issueCategory][specificIssue]
+            });
+
+            // Reset the form
+            document.getElementById("issueCategory").selectedIndex = 0;
+            document.getElementById("specificIssue").selectedIndex = 0;
+            document.getElementById("customerName").value = "";
+            document.getElementById("orderNumber").value = "";
+        }
+
+        function exportToExcel() {
+            const workbook = XLSX.utils.book_new();
+            for (const category in existingEntries) {
+                for (const specific in existingEntries[category]) {
+                    const data = [["Customer Name", "Order Number", "Solution"]];
+                    existingEntries[category][specific].forEach(entry => {
+                        data.push([entry["Customer Name"], entry["Order Number"], entry["Solution"]]);
+                    });
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+                    XLSX.utils.book_append_sheet(workbook, ws, `${category} - ${specific}`);
+                }
+            }
+
+            // Generate Excel binary data
+            const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+            // Convert binary data to a Blob
+            const excelBlob = new Blob([s2ab(excelData)], { type: 'application/octet-stream' });
+
+            // Save the Blob as a file using FileSaver.js
+            saveAs(excelBlob, 'Customer_Service_Entries.xlsx');
+        }
+
+        function s2ab(s) {
+            const buf = new ArrayBuffer(s.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+        }
+    </script>
+  
+</body>
+</html>
