@@ -5,6 +5,7 @@
   
      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
     <style>
         body {
@@ -89,6 +90,26 @@
             text-align: center;
             margin-top: 20px;
         }
+      @media (max-width: 600px) {
+            body {
+                font-size: 14px; /* You can adjust the font size as needed */
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .form-container {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .export-button {
+                text-align: center;
+                margin-top: 20px;
+            }
+        }
    
     </style>
    
@@ -124,10 +145,10 @@
         <div class="summary-container" id="summary"></div>
 
         <div class="export-button">
-            <button onclick="exportToExcel()">
-              Export to Excel
-          </button>
-        </div>
+    <button type="button" onclick="exportToExcel()">
+        Export to Excel
+    </button>
+</div>
     </div>
 
       <script>
