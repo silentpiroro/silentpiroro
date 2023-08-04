@@ -110,6 +110,39 @@
                 margin-top: 20px;
             }
         }
+      /* Add mobile-specific styles */
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px; /* You can adjust the font size as needed */
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .form-container, .summary-container {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .form-container label, .form-container input, .form-container select {
+                margin-bottom: 15px; /* Add margin between input elements */
+            }
+
+            .form-container button {
+                margin-top: 15px; /* Add margin above the submit button */
+            }
+
+            .export-button {
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .summary-container {
+                margin-top: 30px; /* Add margin above the summary container */
+            }
+        }
    
     </style>
    
@@ -176,6 +209,7 @@
         };
 
         const existingEntries = {};
+        const allEntries = [];
 
         function populateSpecificIssues() {
             const issueCategory = document.getElementById("issueCategory").value;
@@ -217,7 +251,7 @@
             summaryDiv.appendChild(summaryContent);
             summaryDiv.style.display = "block";
 
-            // Append the entry to existing entries
+           // Append the entry to existing entries and all entries
             if (!existingEntries[issueCategory]) {
                 existingEntries[issueCategory] = {};
             }
@@ -225,6 +259,14 @@
                 existingEntries[issueCategory][specificIssue] = [];
             }
             existingEntries[issueCategory][specificIssue].push({
+                "Customer Name": customerName,
+                "Order Number": orderNumber,
+                "Solution": issues[issueCategory][specificIssue]
+            });
+
+            allEntries.push({ // Push the entry to the allEntries array as well
+                "Issue Category": issueCategory,
+                "Specific Issue": specificIssue,
                 "Customer Name": customerName,
                 "Order Number": orderNumber,
                 "Solution": issues[issueCategory][specificIssue]
@@ -239,16 +281,21 @@
 
         function exportToExcel() {
             const workbook = XLSX.utils.book_new();
-            for (const category in existingEntries) {
-                for (const specific in existingEntries[category]) {
-                    const data = [["Customer Name", "Order Number", "Solution"]];
-                    existingEntries[category][specific].forEach(entry => {
-                        data.push([entry["Customer Name"], entry["Order Number"], entry["Solution"]]);
-                    });
-                    const ws = XLSX.utils.aoa_to_sheet(data);
-                    XLSX.utils.book_append_sheet(workbook, ws, `${category} - ${specific}`);
-                }
-            }
+            const data = [["Issue Category", "Specific Issue", "Customer Name", "Order Number", "Solution"]];
+
+            // Loop through allEntries array to add each entry to the data array
+            allEntries.forEach(entry => {
+                data.push([
+                    entry["Issue Category"],
+                    entry["Specific Issue"],
+                    entry["Customer Name"],
+                    entry["Order Number"],
+                    entry["Solution"]
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(workbook, ws, "Customer_Service_Entries");
 
             // Generate Excel binary data
             const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
